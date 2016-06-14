@@ -14,7 +14,22 @@ var CommentBox = React.createClass({displayName: "CommentBox",
     });
   },
   handleCommentSubmit: function(comment) {
+    var comments = this.state.data;
+    var newComments = comments.concat([comment]);
+    this.setState({data: newComments});
     // TODO: submit to the server and refresh the list
+    // $.ajax({
+    //   url: this.props.url,
+    //   dataType: 'json',
+    //   type: 'POST',
+    //   data: comment,
+    //   success: function(data) {
+    //     this.setState({data: data});
+    //   }.bind(this),
+    //   error: function(xhr, status, err) {
+    //     console.error(this.props.url, status, err.toString());
+    //   }.bind(this)
+    // });
   },
   getInitialState: function() {
     return {data: []};
@@ -28,7 +43,7 @@ var CommentBox = React.createClass({displayName: "CommentBox",
       React.createElement("div", {className: "commentBox"}, 
         React.createElement("h1", null, "Comments"), 
         React.createElement(CommentList, {data: this.state.data}), 
-        React.createElement(CommentForm, null)
+        React.createElement(CommentForm, {onCommentSubmit: this.handleCommentSubmit})
       )
     );
   }
@@ -52,30 +67,6 @@ var CommentList = React.createClass({displayName: "CommentList",
   }
 });
 
-var CommentForm = React.createClass({displayName: "CommentForm",
-  handleSubmit: function(e) {
-    e.preventDefault();
-    var author = this.refs.author.value.trim();
-    var text = this.refs.text.value.trim();
-    if (!author || !text) {
-      return;
-    }
-    // TODO send request to the server
-    this.refs.author.value = '';
-    this.refs.text.value = '';
-    return;
-  },
-  render: function() {
-    return (
-      React.createElement("form", {className: "commentForm", onSubmit: this.handleSubmit}, 
-        React.createElement("input", {type: "text", placeholder: "Your name", ref: "author"}), 
-        React.createElement("input", {type: "text", placeholder: "Say something...", ref: "text"}), 
-        React.createElement("input", {type: "submit", value: "Post"})
-      )
-    );
-  }
-});
-
 // tutorial3
 var Comment = React.createClass({displayName: "Comment",
   rawMarkup: function() {
@@ -94,11 +85,36 @@ var Comment = React.createClass({displayName: "Comment",
   }
 });
 
+var CommentForm = React.createClass({displayName: "CommentForm",
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var author = this.refs.author.value.trim();
+    var text = this.refs.text.value.trim();
+    if (!author || !text) {
+      return;
+    }
+    this.props.onCommentSubmit({author: author, text: text});
+    // TODO send request to the server
+    this.refs.author.value = '';
+    this.refs.text.value = '';
+    return;
+  },
+  render: function() {
+    return (
+      React.createElement("form", {className: "commentForm", onSubmit: this.handleSubmit}, 
+        React.createElement("input", {type: "text", placeholder: "Your name", ref: "author"}), 
+        React.createElement("input", {type: "text", placeholder: "Say something...", ref: "text"}), 
+        React.createElement("input", {type: "submit", value: "Post"})
+      )
+    );
+  }
+});
+
 // tutorial4
-var data = [
-  {author: "zhoujun", text: "This is *one* comment"},
-  {author: "xiaolu", text: "This is *another* comment"}
-];
+// var data = [
+//   {author: "zhoujun", text: "This is *one* comment"},
+//   {author: "xiaolu", text: "This is *another* comment"}
+// ];
 
 ReactDOM.render(
   React.createElement(CommentBox, {url: "api/comments.json", pollInterval: 2000}),
